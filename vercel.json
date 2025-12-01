@@ -2,21 +2,21 @@
     "version": 2,
     "framework": null,
     "functions": {
-        "public/index.php": { "runtime": "vercel-php@0.7.2" }
+        "api/index.php": { "runtime": "vercel-php@0.7.2" }
     },
     "routes": [
         {
-            "src": "/(css|js|images|storage)/(.*)",
+            "src": "/(css|js|images|storage|build)/(.*)",
             "dest": "/public/$1/$2"
         },
         {
             "src": "/(.*)",
-            "dest": "/public/index.php"
+            "dest": "/api/index.php"
         }
     ],
     "env": {
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
+        "APP_DEBUG": "true",
         "APP_URL": "https://${VERCEL_URL}"
     }
 }
