@@ -10,13 +10,19 @@ class Donation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'donor_name',
-        'donor_address',
-        'donor_whatsapp',
+        'donor_id',
         'type',
         'quantity',
         'date',
         'is_flexible_date',
         'description',
     ];
+
+    /**
+     * Get the donor that owns this donation
+     */
+    public function donor()
+    {
+        return $this->belongsTo(Donor::class);
+    }
 }

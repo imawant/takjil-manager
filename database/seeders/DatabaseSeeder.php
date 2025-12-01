@@ -73,6 +73,16 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Hamba Allah', 'address' => 'Tidak Diketahui', 'whatsapp' => '081111111111'],
         ];
 
+        // Create Donor models first
+        $donorModels = [];
+        foreach ($donors as $donorData) {
+            $donorModels[] = \App\Models\Donor::create([
+                'name' => $donorData['name'],
+                'address' => $donorData['address'],
+                'whatsapp' => $donorData['whatsapp'],
+            ]);
+        }
+
         $descriptions = [
             'Semoga berkah', 'Untuk berbuka puasa', 'Sedekah Ramadhan', 'Hamba Allah', 
             'Titipan dari keluarga', 'Semoga bermanfaat', '', 'Mohon doanya'
@@ -81,13 +91,11 @@ class DatabaseSeeder extends Seeder
         // Generate Nasi Donations (Target ~3500 total, range 10-50, avg 30)
         // 117 * 30 = 3510
         for ($i = 0; $i < 117; $i++) {
-            $donor = $donors[array_rand($donors)];
+            $donor = $donorModels[array_rand($donorModels)];
             $isFlexible = rand(1, 100) <= 30;
 
             \App\Models\Donation::create([
-                'donor_name' => $donor['name'],
-                'donor_address' => $donor['address'],
-                'donor_whatsapp' => $donor['whatsapp'],
+                'donor_id' => $donor->id,
                 'type' => 'nasi',
                 'quantity' => rand(10, 50),
                 'date' => $isFlexible ? null : $startDate->copy()->addDays(rand(0, 29)),
@@ -99,13 +107,11 @@ class DatabaseSeeder extends Seeder
         // Generate Snack Donations (Target ~6000 total, range 10-50, avg 30)
         // 200 * 30 = 6000
         for ($i = 0; $i < 200; $i++) {
-            $donor = $donors[array_rand($donors)];
+            $donor = $donorModels[array_rand($donorModels)];
             $isFlexible = rand(1, 100) <= 30;
 
             \App\Models\Donation::create([
-                'donor_name' => $donor['name'],
-                'donor_address' => $donor['address'],
-                'donor_whatsapp' => $donor['whatsapp'],
+                'donor_id' => $donor->id,
                 'type' => 'snack',
                 'quantity' => rand(10, 50),
                 'date' => $isFlexible ? null : $startDate->copy()->addDays(rand(0, 29)),

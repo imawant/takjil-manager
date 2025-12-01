@@ -19,16 +19,40 @@ class DonationController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        // Find or create donor
+        $donor = \App\Models\Donor::firstOrCreate(
+            ['whatsapp' => $validated['donor_whatsapp']],
+            [
+                'name' => $validated['donor_name'],
+                'address' => $validated['donor_address'] ?? null,
+            ]
+        );
+
+        // If donor exists but name/address changed, update it
+        if ($donor->name !== $validated['donor_name'] || $donor->address !== ($validated['donor_address'] ?? null)) {
+            $donor->update([
+                'name' => $validated['donor_name'],
+                'address' => $validated['donor_address'] ?? null,
+            ]);
+        }
+
         if (!empty($validated['is_flexible_date'])) {
             $validated['date'] = null;
         }
 
-        $donation = \App\Models\Donation::create($validated);
+        $donation = \App\Models\Donation::create([
+            'donor_id' => $donor->id,
+            'type' => $validated['type'],
+            'quantity' => $validated['quantity'],
+            'date' => $validated['date'] ?? null,
+            'is_flexible_date' => $validated['is_flexible_date'] ?? false,
+            'description' => $validated['description'] ?? null,
+        ]);
 
         // Log activity
         \App\Models\ActivityLog::log(
             'created',
-            "Menambah donasi {$donation->donor_name} - {$donation->type} {$donation->quantity} porsi",
+            "Menambah donasi {$donor->name} - {$donation->type} {$donation->quantity} porsi",
             'Donation',
             $donation->id
         );
@@ -50,16 +74,40 @@ class DonationController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        // Find or create donor
+        $donor = \App\Models\Donor::firstOrCreate(
+            ['whatsapp' => $validated['donor_whatsapp']],
+            [
+                'name' => $validated['donor_name'],
+                'address' => $validated['donor_address'] ?? null,
+            ]
+        );
+
+        // If donor exists but name/address changed, update it
+        if ($donor->name !== $validated['donor_name'] || $donor->address !== ($validated['donor_address'] ?? null)) {
+            $donor->update([
+                'name' => $validated['donor_name'],
+                'address' => $validated['donor_address'] ?? null,
+            ]);
+        }
+
         if (!empty($validated['is_flexible_date'])) {
             $validated['date'] = null;
         }
 
-        $donation->update($validated);
+        $donation->update([
+            'donor_id' => $donor->id,
+            'type' => $validated['type'],
+            'quantity' => $validated['quantity'],
+            'date' => $validated['date'] ?? null,
+            'is_flexible_date' => $validated['is_flexible_date'] ?? false,
+            'description' => $validated['description'] ?? null,
+        ]);
 
         // Log activity
         \App\Models\ActivityLog::log(
             'updated',
-            "Mengubah donasi {$donation->donor_name} - {$donation->type} {$donation->quantity} porsi",
+            "Mengubah donasi {$donor->name} - {$donation->type} {$donation->quantity} porsi",
             'Donation',
             $donation->id
         );
@@ -69,22 +117,32 @@ class DonationController extends Controller
 
     public function flexible(\Illuminate\Http\Request $request)
     {
-        $query = \App\Models\Donation::where('is_flexible_date', true)
+        $query = \App\Models\Donation::with('donor')
+            ->where('is_flexible_date', true)
             ->whereNull('date');
 
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('donor_name', 'like', "%{$search}%")
-                  ->orWhere('donor_whatsapp', 'like', "%{$search}%");
+            $query->whereHas('donor', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('whatsapp', 'like', "%{$search}%");
             });
         }
 
         // Sorting
         $sort = $request->query('sort', 'quantity'); // Default sort by quantity
         $direction = $request->query('direction', 'desc');
-        $query->orderBy($sort, $direction);
+        
+        // If sorting by donor fields, use join
+        if (in_array($sort, ['donor_name', 'donor_whatsapp', 'donor_address'])) {
+            $donorField = str_replace('donor_', '', $sort);
+            $query->join('donors', 'donations.donor_id', '=', 'donors.id')
+                  ->orderBy('donors.' . $donorField, $direction)
+                  ->select('donations.*');
+        } else {
+            $query->orderBy($sort, $direction);
+        }
 
         // Pagination
         $perPage = $request->input('per_page', 10);
@@ -193,7 +251,7 @@ class DonationController extends Controller
 
     public function destroy(\App\Models\Donation $donation)
     {
-        $donorName = $donation->donor_name;
+        $donorName = $donation->donor->name;
         $type = $donation->type;
         $quantity = $donation->quantity;
         $donationId = $donation->id;
@@ -214,22 +272,24 @@ class DonationController extends Controller
     public function getDonors(\Illuminate\Http\Request $request)
     {
         $date = $request->query('date');
-        $donations = \App\Models\Donation::where('date', $date)->get();
+        $donations = \App\Models\Donation::with('donor')
+            ->where('date', $date)
+            ->get();
         return response()->json($donations);
     }
 
     public function search(\Illuminate\Http\Request $request)
     {
-        $query = \App\Models\Donation::query();
+        $query = \App\Models\Donation::with('donor');
 
         // Exclude flexible dates
         $query->where('is_flexible_date', false);
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('donor_name', 'like', "%{$search}%")
-                  ->orWhere('donor_whatsapp', 'like', "%{$search}%");
+            $query->whereHas('donor', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('whatsapp', 'like', "%{$search}%");
             });
         }
 
@@ -244,7 +304,16 @@ class DonationController extends Controller
         // Sorting
         $sort = $request->query('sort', 'date');
         $direction = $request->query('direction', 'asc');
-        $query->orderBy($sort, $direction);
+        
+        // If sorting by donor fields, use join
+        if (in_array($sort, ['donor_name', 'donor_whatsapp', 'donor_address'])) {
+            $donorField = str_replace('donor_', '', $sort);
+            $query->join('donors', 'donations.donor_id', '=', 'donors.id')
+                  ->orderBy('donors.' . $donorField, $direction)
+                  ->select('donations.*');
+        } else {
+            $query->orderBy($sort, $direction);
+        }
 
         // Pagination
         $perPage = $request->input('per_page', 10);
@@ -263,23 +332,22 @@ class DonationController extends Controller
 
     public function recap(\Illuminate\Http\Request $request)
     {
-        $sort = $request->query('sort', 'donor_name');
+        $sort = $request->query('sort', 'name');
         $direction = $request->query('direction', 'asc');
 
-        $query = \App\Models\Donation::selectRaw("donor_name, 
-            MAX(donor_whatsapp) as donor_whatsapp,
-            MAX(donor_address) as donor_address,
-            SUM(CASE WHEN type = 'nasi' THEN quantity ELSE 0 END) as total_nasi,
-            SUM(CASE WHEN type = 'snack' THEN quantity ELSE 0 END) as total_snack,
-            SUM(quantity) as total_sumbangan")
-            ->groupBy('donor_name');
+        $query = \App\Models\Donor::selectRaw("donors.*, 
+            COALESCE(SUM(CASE WHEN donations.type = 'nasi' THEN donations.quantity ELSE 0 END), 0) as total_nasi,
+            COALESCE(SUM(CASE WHEN donations.type = 'snack' THEN donations.quantity ELSE 0 END), 0) as total_snack,
+            COALESCE(SUM(donations.quantity), 0) as total_sumbangan")
+            ->leftJoin('donations', 'donors.id', '=', 'donations.donor_id')
+            ->groupBy('donors.id', 'donors.name', 'donors.whatsapp', 'donors.address', 'donors.created_at', 'donors.updated_at');
 
         if ($request->filled('search')) {
             $search = $request->search;
-            // $query->having('donor_name', 'like', "%{$search}%")
-            //       ->orHaving('donor_whatsapp', 'like', "%{$search}%");
-            $query->havingRaw("donor_name ILIKE ?", ["%{$search}%"])
-                  ->orHavingRaw("MAX(donor_whatsapp) ILIKE ?", ["%{$search}%"]);
+            $query->where(function($q) use ($search) {
+                $q->where('donors.name', 'ILIKE', "%{$search}%")
+                  ->orWhere('donors.whatsapp', 'ILIKE', "%{$search}%");
+            });
         }
 
         $donors = $query->orderBy($sort, $direction)->get();
@@ -329,8 +397,9 @@ class DonationController extends Controller
 
     public function getDonorDonations(\Illuminate\Http\Request $request)
     {
-        $donorName = $request->query('donor_name');
-        $donations = \App\Models\Donation::where('donor_name', $donorName)
+        $donorId = $request->query('donor_id');
+        $donations = \App\Models\Donation::with('donor')
+            ->where('donor_id', $donorId)
             ->orderBy('date', 'asc')
             ->get();
         return response()->json($donations);
@@ -344,13 +413,11 @@ class DonationController extends Controller
             return response()->json([]);
         }
 
-        $donors = \App\Models\Donation::select('donor_name', 'donor_whatsapp', 'donor_address')
-            ->where(function($q) use ($query) {
-                $q->where('donor_name', 'ilike', '%' . $query . '%')
-                  ->orWhere('donor_whatsapp', 'ilike', '%' . $query . '%');
+        $donors = \App\Models\Donor::where(function($q) use ($query) {
+                $q->where('name', 'ilike', '%' . $query . '%')
+                  ->orWhere('whatsapp', 'ilike', '%' . $query . '%');
             })
-            ->groupBy('donor_name', 'donor_whatsapp', 'donor_address')
-            ->orderBy('donor_name', 'asc')
+            ->orderBy('name', 'asc')
             ->limit(10)
             ->get();
 

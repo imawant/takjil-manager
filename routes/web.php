@@ -40,6 +40,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/donations/{donation}', [DonationController::class, 'destroy'])->name('donations.destroy');
         Route::get('/donations/flexible', [DonationController::class, 'flexible'])->name('donations.flexible');
         Route::post('/donations/schedule', [DonationController::class, 'scheduleFlexible'])->name('donations.schedule');
+        
+        // Donor management
+        Route::put('/donors/{donor}', [\App\Http\Controllers\DonorController::class, 'update'])->name('donors.update');
     });
 
     // Admin Only

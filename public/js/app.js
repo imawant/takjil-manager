@@ -29,11 +29,30 @@ function openDonationModal(data = null) {
 
         // Fill fields
         dateInput.value = data.date || '';
-        document.getElementById('donor_name').value = data.donor_name;
-        document.getElementById('donor_whatsapp').value = data.donor_whatsapp;
-        document.getElementById('donor_address').value = data.donor_address || '';
+        document.getElementById('donor_name').value = data.donor.name;
+        document.getElementById('donor_whatsapp').value = data.donor.whatsapp;
+        document.getElementById('donor_address').value = data.donor.address || '';
         document.getElementById('quantity').value = data.quantity;
         document.getElementById('description').value = data.description || '';
+
+        // Make donor fields readonly in edit mode
+        const nameField = document.getElementById('donor_name');
+        const whatsappField = document.getElementById('donor_whatsapp');
+        const addressField = document.getElementById('donor_address');
+
+        nameField.setAttribute('readonly', 'readonly');
+        nameField.style.backgroundColor = '#f5f5f5';
+        nameField.style.cursor = 'not-allowed';
+
+        whatsappField.setAttribute('readonly', 'readonly');
+        whatsappField.style.backgroundColor = '#f5f5f5';
+        whatsappField.style.cursor = 'not-allowed';
+        document.getElementById('whatsapp_readonly_note').style.display = 'block';
+
+        addressField.setAttribute('readonly', 'readonly');
+        addressField.style.backgroundColor = '#f5f5f5';
+        addressField.style.cursor = 'not-allowed';
+        document.getElementById('address_readonly_note').style.display = 'block';
 
         // Handle flexible date checkbox
         const flexibleCheckbox = document.getElementById('is_flexible_date');
@@ -56,6 +75,25 @@ function openDonationModal(data = null) {
         // Create Mode
         form.action = '/donations';
         methodInput.value = 'POST';
+
+        // Reset readonly state for create mode
+        const nameField = document.getElementById('donor_name');
+        const whatsappField = document.getElementById('donor_whatsapp');
+        const addressField = document.getElementById('donor_address');
+
+        nameField.removeAttribute('readonly');
+        nameField.style.backgroundColor = '';
+        nameField.style.cursor = '';
+
+        whatsappField.removeAttribute('readonly');
+        whatsappField.style.backgroundColor = '';
+        whatsappField.style.cursor = '';
+        document.getElementById('whatsapp_readonly_note').style.display = 'none';
+
+        addressField.removeAttribute('readonly');
+        addressField.style.backgroundColor = '';
+        addressField.style.cursor = '';
+        document.getElementById('address_readonly_note').style.display = 'none';
 
         if (typeof data === 'string') {
             dateInput.value = data;
@@ -113,9 +151,9 @@ function handleDonorInput(e) {
                 let html = '';
                 donors.forEach(donor => {
                     html += `
-                        <div class="autocomplete-item" onclick="selectDonor('${escapeHtml(donor.donor_name)}', '${escapeHtml(donor.donor_whatsapp)}', '${escapeHtml(donor.donor_address || '')}')">
-                            <div style="font-weight: 500;">${escapeHtml(donor.donor_name)}</div>
-                            <div style="font-size: 0.85rem; color: #666;">${escapeHtml(donor.donor_whatsapp)} - ${escapeHtml(donor.donor_address || '-')}</div>
+                        <div class="autocomplete-item" onclick="selectDonor('${escapeHtml(donor.name)}', '${escapeHtml(donor.whatsapp)}', '${escapeHtml(donor.address || '')}')">
+                            <div style="font-weight: 500;">${escapeHtml(donor.name)}</div>
+                            <div style="font-size: 0.85rem; color: #666;">${escapeHtml(donor.whatsapp)} - ${escapeHtml(donor.address || '-')}</div>
                         </div>
                     `;
                 });
@@ -283,9 +321,9 @@ function renderDonationTable() {
         currentDateDonations.forEach((d, index) => {
             listHtml += `
                 <tr>
-                    <td style="font-weight:500">${d.donor_name}</td>
-                    <td>${d.donor_whatsapp}</td>
-                    <td class="col-alamat" style="font-size:0.9em; color:#64748B">${d.donor_address || '-'}</td>
+                    <td style="font-weight:500">${d.donor.name}</td>
+                    <td>${d.donor.whatsapp}</td>
+                    <td class="col-alamat" style="font-size:0.9em; color:#64748B">${d.donor.address || '-'}</td>
                     <td><span class="stat-badge ${d.type === 'nasi' ? 'stat-nasi' : 'stat-snack'}">${d.type}</span></td>
                     <td>${d.quantity}</td>
                     <td class="col-keterangan">${d.description || '-'}</td>
@@ -347,13 +385,14 @@ function deleteDonation(id) {
 }
 
 // Donor Detail Modal Logic
-function showDonorDetails(donorName) {
-    fetch(`/donations/donor-donations?donor_name=${encodeURIComponent(donorName)}`)
+function showDonorDetails(donorId) {
+    fetch(`/donations/donor-donations?donor_id=${donorId}`)
         .then(response => response.json())
         .then(data => {
             // Get donor info from first record
-            const donorAddress = data.length > 0 ? (data[0].donor_address || '-') : '-';
-            const donorWhatsapp = data.length > 0 ? data[0].donor_whatsapp : '-';
+            const donorName = data.length > 0 && data[0].donor ? data[0].donor.name : '-';
+            const donorAddress = data.length > 0 && data[0].donor ? (data[0].donor.address || '-') : '-';
+            const donorWhatsapp = data.length > 0 && data[0].donor ? data[0].donor.whatsapp : '-';
 
             // Check if user can edit (has access to window.canEdit variable)
             const canEdit = window.canEdit || false;
@@ -480,9 +519,9 @@ function downloadDateDetailsPDF(date) {
             <tbody>
                 ${currentDateDonations.map(d => `
                     <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;">${d.donor_name}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">${d.donor_whatsapp}</td>
-                        <td class="col-alamat" style="padding: 8px; border: 1px solid #ddd; font-size: 11px;">${d.donor_address || '-'}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${d.donor.name}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${d.donor.whatsapp}</td>
+                        <td class="col-alamat" style="padding: 8px; border: 1px solid #ddd; font-size: 11px;">${d.donor.address || '-'}</td>
                         <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background-color: ${d.type === 'nasi' ? '#E6FFEA' : '#E0F2FF'}; font-weight: bold;">${d.type.toUpperCase()}</td>
                         <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${d.quantity}</td>
                         <td class="col-keterangan" style="padding: 8px; border: 1px solid #ddd; font-size: 11px;">${d.description || '-'}</td>
@@ -511,12 +550,13 @@ function downloadDateDetailsPDF(date) {
     html2pdf().set(opt).from(pdfContent).save();
 }
 
-function downloadDonorDetailsPDF(donorName) {
-    fetch(`/donations/donor-donations?donor_name=${encodeURIComponent(donorName)}`)
+function downloadDonorDetailsPDF(donorId) {
+    fetch(`/donations/donor-donations?donor_id=${donorId}`)
         .then(response => response.json())
         .then(data => {
-            const donorAddress = data.length > 0 ? (data[0].donor_address || '-') : '-';
-            const donorWhatsapp = data.length > 0 ? data[0].donor_whatsapp : '-';
+            const donorName = data.length > 0 && data[0].donor ? data[0].donor.name : '-';
+            const donorAddress = data.length > 0 && data[0].donor ? (data[0].donor.address || '-') : '-';
+            const donorWhatsapp = data.length > 0 && data[0].donor ? data[0].donor.whatsapp : '-';
 
             // Create a temporary container for PDF content
             const pdfContent = document.createElement('div');

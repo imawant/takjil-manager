@@ -74,9 +74,9 @@
         <tbody>
             @forelse($donations as $donation)
             <tr>
-                <td style="font-weight: 500;">{{ $donation->donor_name }}</td>
-                <td>{{ $donation->donor_whatsapp }}</td>
-                <td class="col-alamat">{{ $donation->donor_address }}</td>
+                <td style="font-weight: 500;">{{ $donation->donor->name }}</td>
+                <td>{{ $donation->donor->whatsapp }}</td>
+                <td class="col-alamat">{{ $donation->donor->address }}</td>
                 <td>
                     @if($donation->type == 'nasi')
                     <span class="stat-badge stat-nasi">Nasi</span>
@@ -139,8 +139,8 @@
                                 data.forEach(donor => {
                                     const div = document.createElement('div');
                                     div.className = 'autocomplete-item';
-                                    const name = donor.donor_name;
-                                    const wa = donor.donor_whatsapp || '';
+                                    const name = donor.name;
+                                    const wa = donor.whatsapp || '';
                                     
                                     div.innerHTML = `
                                         <div style="font-weight: 500; color: var(--text);">${name}</div>

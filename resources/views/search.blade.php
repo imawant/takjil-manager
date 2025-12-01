@@ -147,9 +147,9 @@
                         {{ \Carbon\Carbon::parse($donation->date)->locale('id')->isoFormat('dddd, D MMM YYYY') }}
                     @endif
                 </td>
-                <td style="font-weight: 500;">{{ $donation->donor_name }}</td>
-                <td class="col-alamat column-hidden">{{ $donation->donor_address }}</td>
-                <td class="col-whatsapp column-hidden">{{ $donation->donor_whatsapp }}</td>
+                <td style="font-weight: 500;">{{ $donation->donor->name }}</td>
+                <td class="col-alamat column-hidden">{{ $donation->donor->address }}</td>
+                <td class="col-whatsapp column-hidden">{{ $donation->donor->whatsapp }}</td>
                 <td>
                     <span class="stat-badge {{ $donation->type == 'nasi' ? 'stat-nasi' : 'stat-snack' }}">
                         {{ ucfirst($donation->type) }}
@@ -212,8 +212,8 @@
                                     const div = document.createElement('div');
                                     div.className = 'autocomplete-item';
                                     // Highlight match
-                                    const name = donor.donor_name;
-                                    const wa = donor.donor_whatsapp || '';
+                                    const name = donor.name;
+                                    const wa = donor.whatsapp || '';
                                     
                                     div.innerHTML = `
                                         <div style="font-weight: 500; color: var(--text);">${name}</div>

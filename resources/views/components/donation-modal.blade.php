@@ -51,14 +51,20 @@
                 <div class="form-group">
                     <label for="donor_whatsapp">Nomor WhatsApp</label>
                     <input type="text" name="donor_whatsapp" id="donor_whatsapp" class="form-control" required 
-                           pattern="^08[0-9]{9,11}$" minlength="11" maxlength="13" 
-                           title="Nomor WhatsApp harus diawali 08 dan terdiri dari 11-13 digit"
-                           placeholder="Contoh: 081234567890">
+                           pattern="08[0-9]{9,11}" 
+                           placeholder="08xxxxxxxxxx"
+                           title="Format: 08xxxxxxxxxx (11-13 digit)">
+                    <small id="whatsapp_readonly_note" style="color: var(--text-muted); font-size: 0.85rem; display: none;">
+                        <i class="ri-lock-line"></i> Info donor tidak bisa diubah. Edit di <a href="/recap" style="color: var(--primary);">Rekap Donatur</a>
+                    </small>
                 </div>
 
                 <div class="form-group">
                     <label for="donor_address">Alamat</label>
                     <textarea name="donor_address" id="donor_address" class="form-control" rows="2" placeholder="Contoh: Jl. Dupak Bangunsari III No. 99"></textarea>
+                    <small id="address_readonly_note" style="color: var(--text-muted); font-size: 0.85rem; display: none;">
+                        <i class="ri-lock-line"></i> Info donor tidak bisa diubah. Edit di <a href="/recap" style="color: var(--primary);">Rekap Donatur</a>
+                    </small>
                 </div>
 
                 <div class="row">
