@@ -395,15 +395,26 @@ class DonationController extends Controller
         return view('distribution', compact('data', 'avgNasi', 'avgSnack'));
     }
 
-    public function getDonorDonations(\Illuminate\Http\Request $request)
+    public function getDonorDonations(Request $request)
     {
-        $donorId = $request->query('donor_id');
-        $donations = \App\Models\Donation::with('donor')
-            ->where('donor_id', $donorId)
-            ->orderBy('date', 'asc')
-            ->get();
+        $donorIdentifier = $request->query('donor_id');
+        
+        // Accept both donor ID (numeric) or donor name (string)
+        $query = \App\Models\Donation::with('donor');
+        
+        if (is_numeric($donorIdentifier)) {
+            $query->where('donor_id', $donorIdentifier);
+        } else {
+            // Query by donor name using relationship
+            $query->whereHas('donor', function($q) use ($donorIdentifier) {
+                $q->where('name', $donorIdentifier);
+            });
+        }
+        
+        $donations = $query->orderBy('date', 'asc')->get();
         return response()->json($donations);
     }
+    
 
     public function getDonorSuggestions(\Illuminate\Http\Request $request)
     {
