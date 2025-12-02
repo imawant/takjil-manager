@@ -435,3 +435,48 @@ class DonationController extends Controller
         return response()->json($donors);
     }
 }
+
+public function downloadDatePDF($date)
+{
+    $donations = \App\Models\Donation::with('donor')
+        ->where('date', $date)
+        ->orderBy('created_at', 'asc')
+        ->get();
+    
+    $dateObj = new \Carbon\Carbon($date);
+    $dayName = $dateObj->locale('id')->isoFormat('dddd');
+    $formattedDate = $dateObj->locale('id')->isoFormat('D MMMM YYYY');
+    
+    $totalNasi = $donations->where('type', 'nasi')->sum('quantity');
+    $totalSnack = $donations->where('type', 'snack')->sum('quantity');
+    
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.date-donations', compact(
+        'donations', 'date', 'dayName', 'formattedDate', 'totalNasi', 'totalSnack'
+    ));
+    
+    return $pdf->setPaper('a4', 'landscape')->download("Donatur_{$date}.pdf");
+}
+
+public function downloadDonorPDF($donorName)
+{
+    $donations = \App\Models\Donation::with('donor')
+        ->whereHas('donor', function($q) use ($donorName) {
+            $q->where('name', $donorName);
+        })
+        ->orderBy('date', 'asc')
+        ->get();
+    
+    if ($donations->isEmpty()) {
+        return back()->with('error', 'Data donasi tidak ditemukan');
+    }
+    
+    $donor = $donations->first()->donor;
+    $totalNasi = $donations->where('type', 'nasi')->sum('quantity');
+    $totalSnack = $donations->where('type', 'snack')->sum('quantity');
+    
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.donor-donations', compact(
+        'donations', 'donor', 'totalNasi', 'totalSnack'
+    ));
+    
+    return $pdf->setPaper('a4')->download("Riwayat_Donasi_{$donor->name}.pdf");
+}
