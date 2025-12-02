@@ -1,4 +1,4 @@
-<h1>🌙 Takjil Managerr</h1>
+<h1>🌙 Takjil Manager</h1>
 
 Takjil Manager is a data management web application designed to assist the committee of Masjid in streamlining the logistics of Takjil donations (Meals & Snacks) during the holy month of Ramadan (Target: 1447 H / 2026 M).
 
