@@ -1,66 +1,41 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<h1>🌙 Takjil Managerr</h1>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Takjil Manager is a data management web application designed to assist the committee of Masjid in streamlining the logistics of Takjil donations (Meals & Snacks) during the holy month of Ramadan (Target: 1447 H / 2026 M).
 
-## About Laravel
+This application replaces manual recording methods to minimize data redundancy, reduce human error, and provide real-time transparency regarding daily stock availability.
+<br></br>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+🔗 Live Demo: https://takjil-manager.vercel.app
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+<br></br>
+<img width="100%" alt="image" src="https://github.com/user-attachments/assets/8c96bd29-a81c-4a57-8fef-b7bb698361f4" />
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+✨ Key Features
+1. 🤖 Smart Auto-Scheduling (Flexible Dates)
+One of the core strengths of this system is its ability to handle "Flexible Date" donors (Donatur Tanggal Bebas).
+Intelligent Distribution: Donors who do not select a specific date are automatically assigned by the system to dates with the lowest stock.
+Load Balancing: Ensures that no day is under-supplied while preventing food waste on over-supplied days.
+Gap Filling: Automatically identifies critical shortages in the schedule and fills them with available flexible donations.
 
-## Learning Laravel
+2. 📅 Interactive Ramadan Calendar
+A complete visual overview of the entire month.
+Dual Calendar System: Displays both Hijri and Gregorian dates.
+Live Stock Indicators: Real-time counters for Rice (Nasi) and Snack portions for every single day.
+Visual Alerts: Color-coded indicators to easily spot days that have reached the quota or are critically low.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+3. 🔍 Quick Search & Tracking
+Instant search functionality to locate specific donors or check availability on specific dates.
+Helps the committee verify donation commitments and status in seconds.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+4. 📊 Data Recapitulation & Analytics
+Donor Recap: A dedicated view to list all donors, their total contributions, and assigned dates.
+Distribution Charts: Visual analytics to monitor the spread of donations throughout the month, helping the committee make data-driven decisions for additional fundraising.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+5. 🔐 Secure Admin Administration
+Secure authentication system for committee members.
+Role-based access to ensure only authorized personnel can add, edit, or delete sensitive donation data.
 
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+<center>
+<p>Built with ❤️ by <b>Imawant</b></p>
+<p>© 2026 Masjid An-Nur</p>
+</center>
