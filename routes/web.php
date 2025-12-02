@@ -25,6 +25,8 @@ Route::get('/distribution', [DonationController::class, 'distribution'])->name('
 Route::get('/donations/donors', [DonationController::class, 'getDonors'])->name('donations.donors');
 Route::get('/donations/donor-donations', [DonationController::class, 'getDonorDonations'])->name('donations.donor-donations');
 Route::get('/donations/donor-suggestions', [DonationController::class, 'getDonorSuggestions'])->name('donations.donor-suggestions');
+Route::get('/donations/date-pdf/{date}', [DonationController::class, 'downloadDatePDF'])->name('donations.date-pdf');
+Route::get('/donations/donor-pdf/{donorName}', [DonationController::class, 'downloadDonorPDF'])->name('donations.donor-pdf');
 
 // Auth Routes
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login')->middleware('guest');
