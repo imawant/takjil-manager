@@ -36,6 +36,6 @@ Secure authentication system for committee members.
 Role-based access to ensure only authorized personnel can add, edit, or delete sensitive donation data.
 
 <center>
-<p>Built with ❤️ by <b>Imawant</b></p>
-<p>© 2026 Masjid An-Nur</p>
+<p>Built by <b>Imawant</b></p>
+<p>© 2026</p>
 </center>
