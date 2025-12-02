@@ -434,8 +434,7 @@ class DonationController extends Controller
 
         return response()->json($donors);
     }
-}
-
+    
 public function downloadDatePDF($date)
 {
     $donations = \App\Models\Donation::with('donor')
@@ -479,4 +478,6 @@ public function downloadDonorPDF($donorName)
     ));
     
     return $pdf->setPaper('a4')->download("Riwayat_Donasi_{$donor->name}.pdf");
+    }
 }
+
