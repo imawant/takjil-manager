@@ -315,17 +315,8 @@ class DonationController extends Controller
             $query->orderBy($sort, $direction);
         }
 
-        // Pagination
-        $perPage = $request->input('per_page', 10);
-        if ($request->filled('search')) {
-            $perPage = $request->input('per_page', 100000); // Show all if searching
-        }
-        
-        if ($perPage == 'all') {
-             $perPage = 100000;
-        }
-
-        $donations = $query->paginate($perPage)->withQueryString();
+        // Get all filtered results for client-side pagination
+        $donations = $query->get();
 
         return view('search', compact('donations'));
     }

@@ -7,19 +7,16 @@
 
 <div class="auth-card">
     <div class="search-box">
-        <form action="{{ route('donations.recap') }}" method="GET" style="display: flex; gap: 0.5rem; width: 100%;">
+        <div style="display: flex; gap: 0.5rem; width: 100%;">
             <div style="position: relative; flex: 1;">
-                <input type="text" id="searchInput" name="search" placeholder="Cari nama donatur atau nomor WhatsApp..." value="{{ request('search') }}" style="width: 100%;" autocomplete="off">
+                <input type="text" id="searchInput" placeholder="Cari nama donatur atau nomor WhatsApp..." style="width: 100%;" autocomplete="off">
                 <div id="searchSuggestions" class="autocomplete-suggestions"></div>
             </div>
             
-            <button type="submit" class="btn-primary">
-                <i class="ri-search-line"></i> Cari
-            </button>
-            <a href="{{ route('donations.recap') }}" class="btn-secondary" style="text-decoration: none; display: flex; align-items: center;">
+            <button type="button" id="resetSearch" class="btn-secondary" style="display: flex; align-items: center;">
                 Reset
-            </a>
-        </form>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -27,15 +24,15 @@
     <table>
         <thead>
             <tr>
-                <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'name', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc']) }}">Nama Donatur <i class="ri-sort-asc"></i></a></th>
-                <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'whatsapp', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc']) }}">WhatsApp <i class="ri-sort-asc"></i></a></th>
-                <th class="col-alamat"><a href="{{ request()->fullUrlWithQuery(['sort' => 'address', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc']) }}">Alamat <i class="ri-sort-asc"></i></a></th>
-                <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'total_nasi', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc']) }}">Total Nasi <i class="ri-sort-asc"></i></a></th>
-                <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'total_snack', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc']) }}">Total Snack <i class="ri-sort-asc"></i></a></th>
+                <th class="sortable" data-column="name">Nama Donatur <i class="ri-arrow-up-down-line sort-icon"></i></th>
+                <th class="sortable" data-column="whatsapp">WhatsApp <i class="ri-arrow-up-down-line sort-icon"></i></th>
+                <th class="col-alamat sortable" data-column="address">Alamat <i class="ri-arrow-up-down-line sort-icon"></i></th>
+                <th class="sortable" data-column="total_nasi">Total Nasi <i class="ri-arrow-up-down-line sort-icon"></i></th>
+                <th class="sortable" data-column="total_snack">Total Snack <i class="ri-arrow-up-down-line sort-icon"></i></th>
                 <th>Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="donorTableBody">
             @forelse($donors as $donor)
             <tr>
                 <td style="font-weight: 500;">{{ $donor->name }}</td>
@@ -119,6 +116,203 @@
 </div>
 @endsection
 
+<style>
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s;
+    }
+    
+    .sortable:hover {
+        background-color: rgba(99, 102, 241, 0.1);
+    }
+    
+    .sortable.active {
+        background-color: rgba(99, 102, 241, 0.15);
+        color: var(--primary);
+    }
+    
+    .sort-icon {
+        font-size: 0.9rem;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+    
+    .sortable:hover .sort-icon {
+        opacity: 0.8;
+    }
+    
+    .sortable.active .sort-icon {
+        opacity: 1;
+    }
+    
+    tbody tr {
+        transition: background-color 0.15s;
+    }
+</style>
+
+<script>
+    // Client-side stable sort for donors table
+    let donorsData = @json($donors);
+    let allDonorsData = @json($donors); // Keep original for filtering
+    let currentSortColumn = null;
+    let currentSortDirection = 'asc';
+    const canEdit = {{ auth()->check() && auth()->user()->can('petugas') ? 'true' : 'false' }};
+    
+    // Search functionality
+    function applySearch() {
+        const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+        
+        // Filter from all data
+        donorsData = allDonorsData.filter(donor => {
+            if (searchQuery) {
+                const matchName = donor.name.toLowerCase().includes(searchQuery);
+                const matchWA = donor.whatsapp.toLowerCase().includes(searchQuery);
+                return matchName || matchWA;
+            }
+            return true;
+        });
+        
+        // Re-apply current sort if any
+        if (currentSortColumn) {
+            sortTable(currentSortColumn, true); // true = skip re-render
+        }
+        
+        renderTable();
+    }
+    
+    function sortTable(column, skipRender = false) {
+        // Toggle direction if same column, otherwise reset to asc
+        if (currentSortColumn === column) {
+            currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortDirection = 'asc';
+        }
+        
+        currentSortColumn = column;
+        
+        // Stable sort with locale support
+        donorsData.sort((a, b) => {
+            let valA = a[column];
+            let valB = b[column];
+            
+            // Handle null/undefined
+            if (valA == null) valA = '';
+            if (valB == null) valB = '';
+            
+            let comparison;
+            
+            // String comparison with Indonesian locale
+            if (typeof valA === 'string') {
+                comparison = valA.localeCompare(valB, 'id-ID', {
+                    sensitivity: 'base',
+                    numeric: true // "10" > "2"
+                });
+            } else {
+                // Numeric comparison
+                comparison = valA - valB;
+            }
+            
+            return currentSortDirection === 'asc' ? comparison : -comparison;
+        });
+        
+        if (!skipRender) {
+            renderTable();
+            updateSortIndicators();
+        }
+    }
+    
+    function renderTable() {
+        const tbody = document.getElementById('donorTableBody');
+        
+        if (donorsData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">Belum ada data donatur.</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = donorsData.map(donor => {
+            const nasiBox = donor.total_nasi > 0 
+                ? `<span class="stat-badge stat-nasi">${donor.total_nasi} Box</span>` 
+                : '-';
+            const snackBox = donor.total_snack > 0 
+                ? `<span class="stat-badge stat-snack">${donor.total_snack} Box</span>` 
+                : '-';
+            
+            const editButton = canEdit 
+                ? `<button class="btn-text" style="color: var(--warning);" onclick="showEditDonorModal(${donor.id}, '${donor.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${donor.whatsapp}', '${(donor.address || '').replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
+                    <i class="ri-edit-line"></i> Edit Info
+                </button>` 
+                : '';
+            
+            return `
+                <tr>
+                    <td style="font-weight: 500;">${donor.name}</td>
+                    <td>${donor.whatsapp}</td>
+                    <td class="col-alamat">${donor.address || ''}</td>
+                    <td>${nasiBox}</td>
+                    <td>${snackBox}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn-text" style="color: var(--primary);" onclick="showDonorDetails(${donor.id})">
+                                <i class="ri-eye-line"></i> Detail
+                            </button>
+                            ${editButton}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    function updateSortIndicators() {
+        // Remove all active states
+        document.querySelectorAll('.sortable').forEach(th => {
+            th.classList.remove('active');
+            const icon = th.querySelector('.sort-icon');
+            icon.className = 'ri-arrow-up-down-line sort-icon';
+        });
+        
+        // Add active state to current column
+        if (currentSortColumn) {
+            const activeTh = document.querySelector(`[data-column="${currentSortColumn}"]`);
+            if (activeTh) {
+                activeTh.classList.add('active');
+                const icon = activeTh.querySelector('.sort-icon');
+                icon.className = currentSortDirection === 'asc' 
+                    ? 'ri-arrow-up-line sort-icon' 
+                    : 'ri-arrow-down-line sort-icon';
+            }
+        }
+    }
+    
+    // Add click handlers to sortable columns
+    document.addEventListener('DOMContentLoaded', function() {
+        let searchTimeout;
+        
+        // Search input with debouncing
+        document.getElementById('searchInput').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                applySearch();
+            }, 300); // 300ms debounce
+        });
+        
+        // Reset button
+        document.getElementById('resetSearch').addEventListener('click', function() {
+            document.getElementById('searchInput').value = '';
+            applySearch();
+        });
+        
+        // Sortable columns
+        document.querySelectorAll('.sortable').forEach(th => {
+            th.addEventListener('click', function() {
+                const column = this.getAttribute('data-column');
+                sortTable(column);
+            });
+        });
+    });
+</script>
+
 <script>
     function showEditDonorModal(donorId, donorName, donorWhatsapp, donorAddress) {
         document.getElementById('edit_donor_id').value = donorId;
@@ -190,61 +384,3 @@
     });
 </script>
 
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchInput');
-        const suggestionsBox = document.getElementById('searchSuggestions');
-        let timeoutId;
-
-        if (searchInput && suggestionsBox) {
-            searchInput.addEventListener('input', function() {
-                clearTimeout(timeoutId);
-                const query = this.value;
-                
-                if (query.length < 2) {
-                    suggestionsBox.style.display = 'none';
-                    return;
-                }
-
-                timeoutId = setTimeout(() => {
-                    fetch(`{{ route('donations.donor-suggestions') }}?q=${encodeURIComponent(query)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            suggestionsBox.innerHTML = '';
-                            if (data.length > 0) {
-                                data.forEach(donor => {
-                                    const div = document.createElement('div');
-                                    div.className = 'autocomplete-item';
-                                    const name = donor.name;
-                                    const wa = donor.whatsapp || '';
-                                    
-                                    div.innerHTML = `
-                                        <div style="font-weight: 500; color: var(--text);">${name}</div>
-                                        ${wa ? `<div style="font-size: 0.85rem; color: var(--text-muted);"><i class="ri-whatsapp-line"></i> ${wa}</div>` : ''}
-                                    `;
-                                    
-                                    div.onclick = function() {
-                                        searchInput.value = name;
-                                        suggestionsBox.style.display = 'none';
-                                        searchInput.form.submit();
-                                    };
-                                    suggestionsBox.appendChild(div);
-                                });
-                                suggestionsBox.style.display = 'block';
-                            } else {
-                                suggestionsBox.style.display = 'none';
-                            }
-                        })
-                        .catch(err => console.error('Error fetching suggestions:', err));
-                }, 300);
-            });
-
-            document.addEventListener('click', function(e) {
-                if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-                    suggestionsBox.style.display = 'none';
-                }
-            });
-        }
-    });
-</script>
