@@ -76,7 +76,6 @@
         </tbody>
     </table>
 </div>
-@endsection
 
 <!-- Edit Donor Modal -->
 <div id="editDonorModal" class="modal">
@@ -118,6 +117,7 @@
         </form>
     </div>
 </div>
+@endsection
 
 <script>
     function showEditDonorModal(donorId, donorName, donorWhatsapp, donorAddress) {
