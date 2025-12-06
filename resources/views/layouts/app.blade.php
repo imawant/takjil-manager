@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <!-- Icons -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('pageicon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('pageicon.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 </head>
 <body>
