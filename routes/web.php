@@ -5,6 +5,7 @@ use App\Http\Controllers\DonationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\TargetController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +20,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::post('/targets/update', [TargetController::class, 'updateTargets'])
+    ->name('targets.update')
+    ->middleware('auth'); // Only authenticated users can update global targets
 Route::get('/search', [DonationController::class, 'search'])->name('donations.search');
 Route::get('/recap', [DonationController::class, 'recap'])->name('donations.recap');
 Route::get('/distribution', [DonationController::class, 'distribution'])->name('donations.distribution');

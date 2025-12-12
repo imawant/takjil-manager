@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+
 use Illuminate\Http\Request;
+use App\Models\Setting;
 
 class DashboardController extends Controller
 {
@@ -12,6 +14,10 @@ class DashboardController extends Controller
         // Note: In a real app, we might want to allow configuring the start date.
         $startDate = \Carbon\Carbon::create(2026, 2, 18);
         $days = [];
+        
+        // Get targets from database with defaults
+        $targetNasi = Setting::get('target_nasi', 120);
+        $targetSnack = Setting::get('target_snack', 200);
         
         // Fetch all donations for the month to minimize queries
         // We fetch 30 days just to be safe
@@ -33,6 +39,6 @@ class DashboardController extends Controller
             ];
         }
 
-        return view('dashboard', compact('days'));
+        return view('dashboard', compact('days', 'targetNasi', 'targetSnack'));
     }
 }

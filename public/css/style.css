@@ -20,6 +20,11 @@
     /* Slate 200 */
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --radius: 12px;
+
+    /* Fluid sizing variables */
+    --fluid-base-size: clamp(0.1rem, 0.5rem + 0.5vw, 1rem);
+    --fluid-gap: clamp(5px, 1px + 0.7vw, 15px) clamp(1px, 1px + 0.7vw, 15px);
+    --fluid-padding: clamp(0.1rem, 0.01rem + 1vw, 2rem);
 }
 
 * {
@@ -47,7 +52,7 @@ body {
 .container {
     max-width: 100%;
     margin: 0 auto;
-    padding: 0 3rem;
+    padding: 0 clamp(1rem, 0.5rem + 2vw, 3rem);
 }
 
 .navbar {
@@ -59,6 +64,8 @@ body {
     z-index: 100;
     padding: 1rem 0;
     width: 100%;
+    /* Prevent navbar from being affected by pinch-zoom */
+    touch-action: pan-y;
 }
 
 
@@ -69,13 +76,13 @@ body {
 }
 
 .logo {
-    font-size: 1.5rem;
+    font-size: clamp(1rem, 0.8rem + 1vw, 1.5rem);
     font-weight: 700;
     color: var(--primary);
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: clamp(0.3rem, 0.2rem + 0.4vw, 0.5rem);
 }
 
 .nav-links {
@@ -88,11 +95,12 @@ body {
     text-decoration: none;
     color: var(--text-muted);
     font-weight: 500;
+    font-size: clamp(0.85rem, 0.8rem + 0.3vw, 1rem);
     transition: color 0.2s;
 
     position: relative;
     /* Agar garis menempel pada elemen ini */
-    padding: 0 1.2rem;
+    padding: 0 clamp(0.8rem, 0.6rem + 0.8vw, 1.2rem);
     /* Memberi ruang kiri-kanan pengganti gap */
     display: flex;
     /* Membantu alignment */
@@ -164,13 +172,14 @@ body {
     color: white;
     margin: 0rem;
     border: none;
-    padding: 0.6rem 1.2rem;
+    padding: clamp(0.4rem, 0.3rem + 0.5vw, 0.6rem) clamp(0.8rem, 0.6rem + 1vw, 1.2rem);
     border-radius: var(--radius);
     font-weight: 600;
+    font-size: clamp(0.8rem, 0.75rem + 0.3vw, 1rem);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: clamp(0.3rem, 0.2rem + 0.4vw, 0.5rem);
     transition: transform 0.2s, box-shadow 0.2s;
     text-decoration: none;
 }
@@ -403,10 +412,10 @@ div.search-box .btn-secondary:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-    margin-top: 1rem;
+    margin-bottom: clamp(1rem, 0.5rem + 2vw, 2rem);
+    margin-top: clamp(0.5rem, 0.3rem + 1vw, 1rem);
     background: white;
-    padding: 1rem;
+    padding: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
     border-radius: var(--radius);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--border);
@@ -415,20 +424,21 @@ div.search-box .btn-secondary:hover {
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 1rem;
+    gap: var(--fluid-gap);
+    container-type: inline-size;
 }
 
 .calendar-day-header {
     text-align: center;
     font-weight: 800;
     color: white;
-    padding: 0.5rem 0;
+    padding: clamp(0.01rem, 0.1rem + 1vw, 0.8rem) 0;
     background: var(--primary);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     text-transform: uppercase;
-    font-size: 1rem;
-    letter-spacing: 0.1em;
+    font-size: clamp(0.6rem, 0.5rem + 0.5vw, 1rem);
+    letter-spacing: clamp(0.02em, 0.01em + 0.1vw, 0.1em);
 }
 
 .calendar-day {
@@ -541,7 +551,7 @@ div.search-box .btn-secondary:hover {
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    margin: 0 0.1rem;
+    margin: 0;
 
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--border);
@@ -631,10 +641,10 @@ div.search-box .btn-secondary:hover {
 }
 
 .card-body-modern {
-    padding: 0.75rem;
+    padding: clamp(0.01rem, 0.01rem + 1vw, 0.5rem);
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: clamp(0.01rem, 0.01rem + 1vw, 0.5rem);
     background: white;
     flex-grow: 1;
     justify-content: center;
@@ -644,66 +654,111 @@ div.search-box .btn-secondary:hover {
     border-bottom-right-radius: 1rem;
 }
 
+/* Battery Indicator Styles */
+.battery-container {
+    position: relative;
+    overflow: hidden;
+}
+
 .stat-item-nasi {
     background: #E6FFEA;
-    border: 2px solid #B8E6BE;
-    border-radius: 0.75rem;
-    padding: 0.5rem 0.75rem;
+    border: clamp(1px, 0.1vw + 1px, 2px) solid #B8E6BE;
+    border-radius: clamp(0.3rem, 0.2rem + 0.5vw, 0.75rem);
+    padding: clamp(0.05rem, 0.05rem + 0.5vw, 1rem);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: 3rem;
-    margin-top: 0.6rem;
+    justify-content: center;
+    height: auto;
+    gap: 0.1rem;
 }
 
 .stat-item-snack {
     background: #E0F2FF;
-    border: 2px solid #B8DFFF;
-    border-radius: 0.75rem;
-    padding: 0.5rem 0.75rem;
+    border: clamp(1px, 0.1vw + 1px, 2px) solid #B8DFFF;
+    border-radius: clamp(0.3rem, 0.2rem + 0.5vw, 0.75rem);
+    padding: clamp(0.05rem, 0.05rem + 0.5vw, 1rem);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: 3rem;
+    justify-content: center;
+    height: auto;
+    gap: 1px;
 }
 
+/* Battery Fill Backgrounds */
+.battery-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transition: width 0.5s ease-out;
+    z-index: 1;
+}
+
+.battery-fill-nasi {
+    background: linear-gradient(90deg, #A8E6B0 0%, #8FD99A 100%);
+}
+
+.battery-fill-snack {
+    background: linear-gradient(90deg, #A0D9FF 0%, #7BC6FF 100%);
+}
+
+/* Animated Wave Effect at the end of fill */
+
+
+/* @keyframes wave-move {
+
+    0%,
+    100% {
+        transform: translateX(0px) scaleX(1);
+    }
+
+    50% {
+        transform: translateX(-3px) scaleX(0.95);
+    }
+} */
+
+
 .stat-label-nasi {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: clamp(0.5rem, 0.01rem + 1.5vw, 1.3rem);
+    font-weight: clamp(600, 600 + 10vw, 700);
     color: #1B4D3E;
 }
 
 .stat-label-snack {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: clamp(0.5rem, 0.01rem + 1.5vw, 1.3rem);
+    font-weight: clamp(600, 600 + 10vw, 700);
     color: #0F4C81;
 }
 
 .stat-value-nasi {
-    font-size: 1.3rem;
+    font-size: clamp(0.4rem, 0.1rem + 1vw, 1.3rem);
     font-weight: 700;
     color: #1B4D3E;
+    position: relative;
+    z-index: 2;
 }
 
 .stat-value-snack {
-    font-size: 1.3rem;
+    font-size: clamp(0.4rem, 0.1rem + 1vw, 1.3rem);
     font-weight: 700;
     color: #0F4C81;
+    position: relative;
+    z-index: 2;
 }
 
 .empty-state {
-    font-size: 0.75rem;
+    font-size: clamp(0.45rem, 0.4rem + 0.8vw, 0.75rem);
     color: #9CA3AF;
     text-align: center;
-    padding: 1rem 0;
+    padding: clamp(0.4rem, 0.3rem + 1vw, 1rem) 0;
 }
 
 /* New Simplified Calendar Date Styles */
 .calendar-date-display {
     position: relative;
-    padding: 1.25rem 0.5rem 0.75rem;
+    padding: clamp(0.6rem, 0.1rem + 1vw, 2rem) clamp(0.01rem, 0.01rem + 0.5vw, 0.5rem);
     text-align: center;
-    min-height: 110px;
+    min-height: clamp(0.01rem, 0.05rem + 2vw, 8rem);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -712,14 +767,14 @@ div.search-box .btn-secondary:hover {
 
 .date-gregorian {
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    font-size: 1rem;
+    top: clamp(0.25rem, 0.2rem + 0.6vw, 0.75rem);
+    right: clamp(0.25rem, 0.2rem + 0.6vw, 0.75rem);
+    font-size: clamp(0.1rem, 0.2rem + 1vw, 1rem);
     color: #6B7280;
     font-weight: 600;
     background: #F3F4F6;
-    padding: 0.2rem 0.5rem;
-    border-radius: 6px;
+    padding: clamp(0.01rem, 0.01rem + 0.2vw, 0.2rem) clamp(0.01rem, 0.01rem + 0.4vw, 0.5rem);
+    border-radius: clamp(3px, 2px + 0.5vw, 6px);
 }
 
 .date-hijri-container {
@@ -727,13 +782,19 @@ div.search-box .btn-secondary:hover {
     flex-direction: column;
     align-items: center;
     line-height: 1;
-    padding-top: 1rem;
+    padding-top: clamp(0.3rem, 0.2rem + 1vw, 1rem);
 }
 
 .date-hijri-number {
-    font-size: 3rem;
+    font-size: clamp(0.5rem, 0.01rem + 5vw, 3rem);
     font-weight: 800;
     letter-spacing: 0.02em;
+}
+
+.date-hijri-label {
+    font-size: clamp(0.4rem, 0.4rem + 1vw, 1rem);
+    font-weight: 600;
+    color: #6B7280;
 }
 
 /* ============================
@@ -869,7 +930,8 @@ th a {
     gap: 0.5rem;
 }
 
-.col-alamat, .col-keterangan {
+.col-alamat,
+.col-keterangan {
     max-width: 300px;
     white-space: normal;
     word-wrap: break-word;
@@ -1040,9 +1102,13 @@ th a {
 /* ============================
    Responsive Media Queries
    ============================ */
+/* ============================
+   Responsive - Structural Changes Only
+   (Sizing handled by clamp() functions)
+   ============================ */
 @media (max-width: 768px) {
 
-    /* Navigation */
+    /* Navigation - Mobile Menu Toggle */
     .nav-links {
         display: none;
         position: fixed;
@@ -1065,70 +1131,44 @@ th a {
         display: block;
     }
 
-    /* Layout */
+    /* Layout - Stack Columns */
     .container {
-        padding: 0 1rem;
+        padding: 0 clamp(0.5rem, 0.3rem + 1vw, 1rem);
     }
 
     .row {
         flex-direction: column;
-        gap: 1rem;
+        gap: clamp(0.5rem, 0.3rem + 1vw, 1rem);
     }
 
     .col {
         width: 100%;
     }
 
-    /* Calendar */
-    .calendar-grid {
-        grid-template-columns: repeat(1, 1fr);
-    }
-
-    .calendar-day {
-        min-height: auto;
-        flex-direction: row;
-        align-items: center;
-    }
-
-    .calendar-day-header {
-        display: none;
-        padding: 0;
-    }
-
-    .day-stats {
-        flex-direction: row;
-        gap: 1rem;
-    }
-
     .main-content {
         width: 100%;
     }
 
-    /* Modern Card Mobile */
-    .mobile-card-header {
-        display: block;
-        background: var(--primary);
-        color: white;
-        padding: 0.2rem 1rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-size: 0.875rem;
-        text-align: center;
-    }
+    /* Calendar - Enable horizontal scroll on very small devices */
+    /* .modern-calendar-container {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    } */
 
-    .modern-card {
-        margin: 0.5rem 2rem;
-    }
+    /* Hide mobile day name header in grid mode */
+    /* .mobile-card-header {
+        display: none;
+    } */
 
     /* Chart */
     .donationChart {
-        width: 80vw;
+        width: clamp(300px, 80vw, 1200px);
         height: 400px;
     }
 
-    /* Tables */
-    .table-container {
+    /* Tables - Card Layout for Mobile */
+    /* .table-container {
         display: flex;
         max-width: 92vw;
         border-radius: 1.5rem;
@@ -1153,18 +1193,14 @@ th a {
     .table-container th:first-child,
     .table-container td:first-child {
         padding-left: 1rem;
-    }
+    } */
 
-    /* Search Box Responsive */
-    div.search-box {
-        padding: 1rem;
-    }
-
+    /* Search Box - Stack on Mobile */
     div.search-box form {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        gap: 0.75rem;
+        gap: clamp(0.5rem, 0.4rem + 0.8vw, 0.75rem);
     }
 
     div.search-box div[style*="position: relative"] {
@@ -1177,7 +1213,7 @@ th a {
         width: 100%;
         display: flex !important;
         flex-wrap: wrap !important;
-        gap: 0.75rem !important;
+        gap: clamp(0.5rem, 0.4rem + 0.8vw, 0.75rem) !important;
         align-items: center !important;
     }
 
@@ -1204,7 +1240,7 @@ th a {
         min-width: 0;
     }
 
-    /* Activity Table Mobile */
+    /* Activity Table - Card Layout */
     .activity-table {
         display: block;
         overflow-x: auto;

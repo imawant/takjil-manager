@@ -495,3 +495,162 @@ function downloadDateDetailsPDF(date) {
 function downloadDonorDetailsPDF(donorName) {
     window.location.href = `/donations/donor-pdf/${encodeURIComponent(donorName)}`;
 }
+
+// ========================================
+// Guest Target Settings
+// ========================================
+
+/**
+ * Load guest targets from localStorage on page load (for non-authenticated users)
+ */
+function loadGuestTargets() {
+    if (!window.isAuthenticated) {
+        const guestNasi = localStorage.getItem('guest_target_nasi');
+        const guestSnack = localStorage.getItem('guest_target_snack');
+
+        if (guestNasi) {
+            window.initialTargetNasi = parseInt(guestNasi);
+        }
+
+        if (guestSnack) {
+            window.initialTargetSnack = parseInt(guestSnack);
+        }
+
+        // Recalculate percentages with guest values
+        if (guestNasi || guestSnack) {
+            updateBatteryPercentages();
+        }
+    }
+}
+
+/**
+ * Open target settings modal for guests
+ */
+function openTargetModal() {
+    const modal = document.getElementById('targetModal');
+    const nasiInput = document.getElementById('guestTargetNasi');
+    const snackInput = document.getElementById('guestTargetSnack');
+
+    // Populate with current values
+    nasiInput.value = window.initialTargetNasi;
+    snackInput.value = window.initialTargetSnack;
+
+    modal.classList.add('active');
+}
+
+/**
+ * Close target settings modal
+ */
+function closeTargetModal() {
+    const modal = document.getElementById('targetModal');
+    modal.classList.remove('active');
+}
+
+/**
+ * Save guest targets to localStorage (prevents form submission)
+ */
+function saveGuestTargets(event) {
+    event.preventDefault();
+
+    // Read from modal inputs
+    const targetNasi = document.getElementById('guestTargetNasi').value;
+    const targetSnack = document.getElementById('guestTargetSnack').value;
+
+    // Validate
+    if (!targetNasi || parseInt(targetNasi) < 1 || !targetSnack || parseInt(targetSnack) < 1) {
+        showGuestMessage('Target harus minimal 1!', 'error');
+        return false;
+    }
+
+    // Save to localStorage
+    localStorage.setItem('guest_target_nasi', targetNasi);
+    localStorage.setItem('guest_target_snack', targetSnack);
+
+    // Update global variables
+    window.initialTargetNasi = parseInt(targetNasi);
+    window.initialTargetSnack = parseInt(targetSnack);
+
+    // Recalculate and update UI
+    updateBatteryPercentages();
+
+    // Close modal
+    closeTargetModal();
+
+    // Show success message
+    showGuestMessage('Target berhasil diperbarui untuk sesi Anda!', 'success');
+
+    return false;
+}
+
+/**
+ * Update battery percentages based on current targets
+ */
+function updateBatteryPercentages() {
+    const cards = document.querySelectorAll('.modern-card');
+
+    cards.forEach(card => {
+        // Extract nasi value from text content
+        const nasiSpan = card.querySelector('.stat-value-nasi');
+        const snackSpan = card.querySelector('.stat-value-snack');
+
+        if (nasiSpan) {
+            const nasiMatch = nasiSpan.textContent.match(/\d+/);
+            const nasiValue = nasiMatch ? parseInt(nasiMatch[0]) : 0;
+            const nasiPercentage = Math.min((nasiValue / window.initialTargetNasi) * 100, 100);
+
+            const nasiFill = card.querySelector('.battery-fill-nasi');
+            if (nasiFill) {
+                nasiFill.style.width = nasiPercentage + '%';
+            }
+        }
+
+        if (snackSpan) {
+            const snackMatch = snackSpan.textContent.match(/\d+/);
+            const snackValue = snackMatch ? parseInt(snackMatch[0]) : 0;
+            const snackPercentage = Math.min((snackValue / window.initialTargetSnack) * 100, 100);
+
+            const snackFill = card.querySelector('.battery-fill-snack');
+            if (snackFill) {
+                snackFill.style.width = snackPercentage + '%';
+            }
+        }
+    });
+}
+
+/**
+ * Show success/error message for guest actions
+ */
+function showGuestMessage(message, type = 'success') {
+    // Remove existing message if any
+    const existingAlert = document.querySelector('.guest-alert');
+    if (existingAlert) existingAlert.remove();
+
+    // Create alert element
+    const alert = document.createElement('div');
+    alert.className = `alert ${type} guest-alert`;
+    alert.style.margin = '1rem 0';
+    alert.style.animation = 'slideIn 0.3s ease';
+
+    const icon = type === 'success' ? 'ri-check-line' : 'ri-error-warning-line';
+    alert.innerHTML = `<i class="${icon}"></i> ${message}`;
+
+    // Insert after header
+    const header = document.querySelector('.calendar-header');
+    if (header) {
+        header.insertAdjacentElement('afterend', alert);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            alert.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => alert.remove(), 300);
+        }, 3000);
+    }
+}
+
+// Initialize guest targets on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadGuestTargets);
+} else {
+    // DOM already loaded
+    loadGuestTargets();
+}
