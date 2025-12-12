@@ -7,16 +7,16 @@
 
 <div class="auth-card">
     <div class="search-box">
-        <div style="display: flex; gap: 0.5rem; width: 100%;">
-            <div style="position: relative; flex: 1;">
-                <input type="text" id="searchInput" placeholder="Cari nama donatur atau nomor WhatsApp..." style="width: 100%;" autocomplete="off">
-                <div id="searchSuggestions" class="autocomplete-suggestions"></div>
+            <div style="display: flex; gap: 0.5rem; width: 100%;">
+                <div style="position: relative; flex: 1; width: 100%;">
+                    <input type="text" id="searchInput" placeholder="Cari nama donatur atau nomor WhatsApp..." style="width: 100%; min-width: 12rem;" autocomplete="off">
+                    <div id="searchSuggestions" class="autocomplete-suggestions"></div>
+                </div>
+                
+                <button type="button" id="resetSearch" class="btn-secondary" style="display: flex; align-items: center; max-width: 6rem;">
+                    Reset
+                </button>
             </div>
-            
-            <button type="button" id="resetSearch" class="btn-secondary" style="display: flex; align-items: center;">
-                Reset
-            </button>
-        </div>
     </div>
 </div>
 

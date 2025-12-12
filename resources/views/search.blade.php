@@ -48,22 +48,24 @@
 
 <div class="auth-card">
     <div class="search-box">
-        <div style="display: flex; gap: 0.5rem; width: 100%;">
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
             <div style="position: relative; flex: 1;">
                 <input type="text" id="searchInput" placeholder="Cari nama donatur atau nomor WhatsApp..." style="width: 100%;" autocomplete="off">
                 <div id="searchSuggestions" class="autocomplete-suggestions"></div>
             </div>
             
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <select id="typeFilter" style="width: auto;">
+            <div style="display: flex; gap: 0.5rem; align-items: center; width: auto;">
+                <select id="typeFilter">
                     <option value="">Semua Jenis</option>
                     <option value="nasi">Nasi</option>
                     <option value="snack">Snack</option>
                 </select>
-                
-                <input type="date" id="startDateFilter" style="width: auto;">
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; align-items: center; width: 100%; max-width: 20rem;">
+                <input type="date" id="startDateFilter" style="flex: 1; min-width: 0;">
                 <span style="color: var(--text-muted);">-</span>
-                <input type="date" id="endDateFilter" style="width: auto;">
+                <input type="date" id="endDateFilter" style="flex: 1; min-width: 0;">
             </div>
 
             <button type="button" id="resetFilters" class="btn-secondary" style="display: flex; align-items: center;">
