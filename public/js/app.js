@@ -56,7 +56,8 @@ function openDonationModal(data = null) {
 
         // Handle flexible date checkbox
         const flexibleCheckbox = document.getElementById('is_flexible_date');
-        if (data.is_flexible_date) {
+        // If it has a scheduled date, it is NOT flexible at this moment (even if it was originally)
+        if (data.is_flexible_date && !data.date) {
             flexibleCheckbox.checked = true;
             dateInput.removeAttribute('required');
             document.getElementById('dateInputContainer').style.display = 'none';
@@ -558,7 +559,7 @@ function saveGuestTargets(event) {
 
     // Validate
     if (!targetNasi || parseInt(targetNasi) < 1 || !targetSnack || parseInt(targetSnack) < 1) {
-        showGuestMessage('Target harus minimal 1!', 'error');
+        showNotification('Target harus minimal 1!', 'error');
         return false;
     }
 
@@ -577,10 +578,11 @@ function saveGuestTargets(event) {
     closeTargetModal();
 
     // Show success message
-    showGuestMessage('Target berhasil diperbarui untuk sesi Anda!', 'success');
+    showNotification('Target berhasil diperbarui untuk sesi Anda!', 'success');
 
     return false;
 }
+
 
 /**
  * Update battery percentages based on current targets
@@ -618,31 +620,41 @@ function updateBatteryPercentages() {
 }
 
 /**
- * Show success/error message for guest actions
+ * Show success/error message with custom UI
  */
-function showGuestMessage(message, type = 'success') {
-    // Remove existing message if any
-    const existingAlert = document.querySelector('.guest-alert');
-    if (existingAlert) existingAlert.remove();
+function showNotification(message, type = 'success') {
+    // Remove existing generic alerts if any
+    const existingAlert = document.querySelectorAll('.alert:not(.server-alert)');
+    existingAlert.forEach(el => el.remove());
 
     // Create alert element
     const alert = document.createElement('div');
-    alert.className = `alert ${type} guest-alert`;
-    alert.style.margin = '1rem 0';
+    alert.className = `alert ${type}`;
     alert.style.animation = 'slideIn 0.3s ease';
 
-    const icon = type === 'success' ? 'ri-check-line' : 'ri-error-warning-line';
-    alert.innerHTML = `<i class="${icon}"></i> ${message}`;
+    // Add close button functionality
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-alert';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.onclick = function () {
+        alert.remove();
+    };
 
-    // Insert after header
-    const header = document.querySelector('.calendar-header');
-    if (header) {
-        header.insertAdjacentElement('afterend', alert);
+    const icon = type === 'success' ? 'ri-checkbox-circle-line' : 'ri-error-warning-line';
+    alert.innerHTML = `<i class="${icon}"></i> ${message}`;
+    alert.appendChild(closeBtn);
+
+    // Insert at top of main content
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.prepend(alert);
 
         // Remove after 3 seconds
         setTimeout(() => {
-            alert.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => alert.remove(), 300);
+            if (alert.parentElement) {
+                alert.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => alert.remove(), 300);
+            }
         }, 3000);
     }
 }

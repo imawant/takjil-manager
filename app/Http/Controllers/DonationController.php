@@ -118,8 +118,7 @@ class DonationController extends Controller
     public function flexible(\Illuminate\Http\Request $request)
     {
         $query = \App\Models\Donation::with('donor')
-            ->where('is_flexible_date', true)
-            ->whereNull('date');
+            ->where('is_flexible_date', true);
 
         // Search
         if ($request->filled('search')) {
@@ -145,21 +144,15 @@ class DonationController extends Controller
         }
 
         // Pagination
-        $perPage = $request->input('per_page', 10);
-        if ($request->filled('search')) {
-            $perPage = $request->input('per_page', 100000); // Show all if searching
-        }
-        
-        if ($perPage == 'all') {
-             $perPage = 100000;
-        }
+        // For flexible view with client-side pagination, we want to fetch all records
+        $perPage = 10000;
 
         $donations = $query->paginate($perPage)->withQueryString();
             
         return view('flexible', compact('donations'));
     }
 
-    public function scheduleFlexible()
+    public function scheduleFlexible(Request $request)
     {
         // 1. Get all donations (fixed and flexible) to calculate total daily average
         // Assuming Ramadan 2026 range
@@ -179,17 +172,21 @@ class DonationController extends Controller
         $avgSnack = ceil($totalSnack / 30);
 
         // 2. Get flexible donations to schedule (sorted by quantity desc)
-        $flexibleNasi = \App\Models\Donation::where('is_flexible_date', true)
-            ->whereNull('date')
-            ->where('type', 'nasi')
-            ->orderBy('quantity', 'desc')
-            ->get();
-            
-        $flexibleSnack = \App\Models\Donation::where('is_flexible_date', true)
-            ->whereNull('date')
-            ->where('type', 'snack')
-            ->orderBy('quantity', 'desc')
-            ->get();
+        $query = \App\Models\Donation::where('is_flexible_date', true)
+            ->whereNull('date');
+
+        if ($request->input('schedule_type') === 'selected') {
+            $selectedIds = $request->input('selected_donations', []);
+            if (empty($selectedIds)) {
+                return redirect()->back()->with('error', 'Tidak ada data yang dipilih untuk dijadwalkan.');
+            }
+            $query->whereIn('id', $selectedIds);
+        }
+
+        $flexibleDonations = $query->get();
+
+        $flexibleNasi = $flexibleDonations->where('type', 'nasi')->sortByDesc('quantity');
+        $flexibleSnack = $flexibleDonations->where('type', 'snack')->sortByDesc('quantity');
 
         // 3. Initialize daily loads
         $dailyNasi = [];

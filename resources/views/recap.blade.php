@@ -364,13 +364,28 @@
             return response.json();
         })
         .then(data => {
-            alert(data.message || 'Info donatur berhasil diperbarui!');
+            showNotification(data.message || 'Info donatur berhasil diperbarui!', 'success');
+            
+            // Update local data
+            const donorIndex = allDonorsData.findIndex(d => d.id == donorId);
+            if (donorIndex !== -1) {
+                allDonorsData[donorIndex].name = donorName;
+                allDonorsData[donorIndex].whatsapp = donorWhatsapp;
+                allDonorsData[donorIndex].address = donorAddress;
+                
+                // Refresh table
+                applySearch();
+            }
+            
             closeEditDonorModal();
-            window.location.reload();
+            
+            // Reset button state
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalText;
         })
         .catch(error => {
             console.error('Error:', error);
-            alert(error.message || 'Terjadi kesalahan. Silakan coba lagi.');
+            showNotification(error.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
             submitButton.disabled = false;
             submitButton.innerHTML = originalText;
         });
